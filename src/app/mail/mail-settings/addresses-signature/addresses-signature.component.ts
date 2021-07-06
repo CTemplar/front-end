@@ -531,6 +531,12 @@ export class AddressesSignatureComponent implements OnInit {
     }
   }
 
+  onClickSignMessage(isEnabled: boolean) {
+    if (this.selectedMailboxForManage) {
+      this.selectedMailboxForManage.is_pgp_sign = isEnabled;
+    }
+  }
+
   onConfirmSetManageMailbox() {
     if (this.selectedMailboxForManage) {
       this.store.dispatch(new MailboxSettingsUpdate(this.selectedMailboxForManage));

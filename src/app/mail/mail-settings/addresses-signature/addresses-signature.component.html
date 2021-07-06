@@ -984,12 +984,12 @@
     </button>
   </div>
   <div class="modal-body bg-faded">
-    <p class="text-holder text-dark text-medium">
-      {{ 'settings.security.attach_public_key_tooltip' | translate }}
-    </p>
-    <div class="mt-3">
+    <div>
       <!-- Attach Public Key -->
-      <div class="form-content-row mb-3">
+      <p class="text-holder text-dark text-medium">
+        {{ 'settings.security.attach_public_key_tooltip' | translate }}
+      </p>
+      <div class="form-content-row mt-3 mb-3">
         <div class="row align-items-center">
           <div class="col-sm-5">
             <label class="form-label mb-0" [translate]="'settings.security.attach_public_key'">Attach public key</label>
@@ -1020,6 +1020,47 @@
                     (click)="onClickAttachPublicKey(false)"
                   />
                   <label for="isAttach2" [translate]="'common.disabled'">Disabled</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Sign Messages -->
+      <p class="text-holder text-dark text-medium mt-5">
+        {{ 'settings.security.sign_message_tooltip' | translate }}
+      </p>
+      <div class="form-content-row mt-3 mb-3">
+        <div class="row align-items-center">
+          <div class="col-sm-5">
+            <label class="form-label mb-0" [translate]="'settings.security.sign_message'">Sign messages</label>
+          </div>
+          <div class="col-sm-7">
+            <div class="row row-sm">
+              <div class="col-6 flex-auto-col">
+                <div class="fancy-field-group">
+                  <input
+                    class="d-none fancy-field-control fancy-field-control-sm"
+                    id="isSign1"
+                    name="[isSign]"
+                    type="radio"
+                    [checked]="selectedMailboxForManage.is_pgp_sign"
+                    (click)="onClickSignMessage(true)"
+                  />
+                  <label for="isSign1" [translate]="'common.enabled'">Enabled</label>
+                </div>
+              </div>
+              <div class="col-6 flex-auto-col">
+                <div class="fancy-field-group">
+                  <input
+                    class="d-none fancy-field-control fancy-field-control-sm"
+                    id="isSign2"
+                    name="[isSign]"
+                    type="radio"
+                    [checked]="!selectedMailboxForManage.is_pgp_sign"
+                    (click)="onClickSignMessage(false)"
+                  />
+                  <label for="isSign2" [translate]="'common.disabled'">Disabled</label>
                 </div>
               </div>
             </div>

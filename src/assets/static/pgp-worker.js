@@ -19,7 +19,7 @@ onmessage = async function (event) {
         });
       });
     } else {
-      encryptContent(event.data.mailData.content, event.data.publicKeys).then(content => {
+      encryptContent(event.data.mailData.content, event.data.publicKeys, event.data.shouldSign, decryptedAllPrivKeys[event.data.mailboxId]).then(content => {
         postMessage({ encryptedContent: { content, subject: event.data.mailData.subject }, encrypted: true, callerId: event.data.callerId });
       });
     }
@@ -328,6 +328,14 @@ onmessage = async function (event) {
         subjectId: event.data.subjectId,
       });
     });
+  } else if (event.data.signing) {
+    signContent(event.data.mailData.content, decryptedAllPrivKeys[event.data.mailboxId], event.data.publicKeys).then(content => {
+      postMessage({ ...event.data, signContent: content ?? '' });
+    });
+  } else if (event.data.signingPGPInline) {
+    signPGPInlineMessage(event.data.mailData.content, decryptedAllPrivKeys[event.data.mailboxId]).then(content => {
+      postMessage({ ...event.data, signContent: content ?? '' });
+    });
   }
 };
 
@@ -489,7 +497,48 @@ async function changePassphrase(passphrase) {
   return { keys: keysMap, changePassphrase: true };
 }
 
-async function encryptContent(data, publicKeys) {
+async function signContent(contents, privateKeyObj, publicKeys) {
+  if (!contents) {
+    return Promise.resolve(contents);
+  }
+  const message = openpgp.message.fromText(contents);
+  const { signature: detachedSignature } = await openpgp.sign({
+    message,
+    privateKeys: privateKeyObj.map(obj => obj.private_key),
+    detached: true,
+  });
+  
+  let signature = await openpgp.signature.readArmored(detachedSignature);
+  const pubkeys = await Promise.all(
+    publicKeys.map(async key => {
+      return (await openpgp.key.readArmored(key)).keys[0];
+    }),
+  );
+  let verified = await openpgp.verify({message, publicKeys: pubkeys, signature});
+  const { valid } = verified.signatures[0];
+  if (valid) {
+    console.log('signed by key id ' + verified.signatures[0].keyid.toHex());
+  } else {
+    console.log('signature could not be verified');
+  }
+
+  return detachedSignature;
+}
+
+async function signPGPInlineMessage(contents, privateKeyObj) {
+  if (!contents) {
+    return Promise.resolve(contents);
+  }
+  const message = openpgp.cleartext.fromText(contents);
+  const { data: signature } = await openpgp.sign({
+    message,
+    privateKeys: privateKeyObj.map(obj => obj.private_key),
+  });
+  
+  return signature;
+}
+
+async function encryptContent(data, publicKeys, shouldSign=false, privateKeyObj) {
   if (!data) {
     return Promise.resolve(data);
   }
@@ -498,10 +547,16 @@ async function encryptContent(data, publicKeys) {
       return (await openpgp.key.readArmored(key)).keys[0];
     }),
   );
-  const options = {
+  let options = {
     message: openpgp.message.fromText(data),
     publicKeys: pubkeys,
   };
+  if(shouldSign) {
+    options = {
+      ...options,
+      privateKeys: privateKeyObj.map(obj => obj.private_key),
+    }
+  }
   return openpgp.encrypt(options)
     .then(payload => {
       return payload.data;

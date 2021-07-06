@@ -22,6 +22,7 @@ import {
   UpdateSecureMessageContent,
   UpdateSecureMessageEncryptedContent,
   UpdateSecureMessageKey,
+  UpdateSignContent,
   UploadAttachment,
 } from '../actions';
 import {
@@ -194,6 +195,40 @@ export class OpenPgpService {
     });
   }
 
+  getMailboxSignFlag(mailboxId: number) {
+    return this.mailboxes.find(m => m.id === mailboxId)?.is_pgp_sign;
+  }
+
+  getMailboxPublicKey(mailboxId: number) {
+    return this.mailboxes.find(m => m.id === mailboxId)?.public_key;
+  }
+
+  getMailboxEmail(mailboxId: number) {
+    return this.mailboxes.find(m => m.id === mailboxId)?.email;
+  }
+
+  signContents(mailboxId: number, mailData: SecureContent, draftId: number) {
+    const pubKeys = this.publicKeys[mailboxId].map((key: any) => key.public_key);
+    this.pgpWorker.postMessage({
+      mailData,
+      signing: true,
+      mailboxId,
+      callerId: draftId,
+      publicKeys: pubKeys,
+    });
+  }
+
+  signPGPInlineMessage(mailboxId: number, mailData: SecureContent, draftId: number) {
+    const pubKeys = this.publicKeys[mailboxId].map((key: any) => key.public_key);
+    this.pgpWorker.postMessage({
+      mailData,
+      signingPGPInline: true,
+      mailboxId,
+      callerId: draftId,
+      publicKeys: pubKeys,
+    });
+  }
+
   // Encrypt - Decrypt content
   encrypt(
     mailboxId: number,
@@ -201,6 +236,7 @@ export class OpenPgpService {
     mailData: SecureContent,
     publicKeys: any[] = [],
     pgpEncryptionTypeForExternal: PGPEncryptionType = undefined,
+    shouldSign = false,
   ) {
     this.store.dispatch(new UpdatePGPEncryptedContent({ isPGPInProgress: true, encryptedContent: {}, draftId }));
     const pubKeys =
@@ -213,6 +249,8 @@ export class OpenPgpService {
       encrypt: true,
       callerId: draftId,
       pgpEncryptionTypeForExternal,
+      mailboxId,
+      shouldSign,
     });
   }
 
@@ -826,6 +864,20 @@ export class OpenPgpService {
         this.handleObservable(event.data.subjectId, event.data);
       } else if (event.data.encryptedPrivateKey) {
         this.handleObservable(event.data.subjectId, event.data);
+      } else if (event.data.signing) {
+        this.store.dispatch(
+          new UpdateSignContent({
+            signContent: event.data.signContent,
+            draftId: event.data.callerId,
+          }),
+        );
+      } else if (event.data.signingPGPInline) {
+        this.store.dispatch(
+          new UpdateSignContent({
+            signContent: event.data.signContent,
+            draftId: event.data.callerId,
+          }),
+        );
       }
     };
   }

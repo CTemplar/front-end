@@ -593,6 +593,17 @@
                       <a class="ql-size-small" [translate]="'settings.security.attach_public_key'">Attach public key</a>
                     </div>
                   </button>
+                  <button
+                    class="dropdown-item dropdown-menu-item dropdown-menu-item-attach"
+                    (click)="onClickSignMessage(!selectedMailbox?.is_pgp_sign)"
+                  >
+                    <div class="row-item">
+                      <div class="check-box">
+                        <i *ngIf="selectedMailbox?.is_pgp_sign" class="fa fa-check text-black-50 ng-star-inserted"></i>
+                      </div>
+                      <a class="ql-size-small" [translate]="'common.sign_message'">Sign message</a>
+                    </div>
+                  </button>
                 </div>
               </div>
             </li>
