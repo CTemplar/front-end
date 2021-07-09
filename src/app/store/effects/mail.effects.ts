@@ -165,10 +165,12 @@ export class MailEffects {
     ofType(MailActionTypes.READ_MAIL),
     map((action: ReadMail) => action.payload),
     switchMap(payload => {
-      return this.mailService.markAsRead(payload.ids, payload.read, payload.folder).pipe(
-        switchMap(() => of(new ReadMailSuccess(payload))),
-        catchError(() => of(new SnackErrorPush({ message: 'Failed to mark mail as read.' }))),
-      );
+      return payload?.isLocalUpdate
+        ? of(new ReadMailSuccess(payload))
+        : this.mailService.markAsRead(payload.ids, payload.read, payload.folder).pipe(
+            switchMap(() => of(new ReadMailSuccess(payload))),
+            catchError(() => of(new SnackErrorPush({ message: 'Failed to mark mail as read.' }))),
+          );
     }),
   );
 

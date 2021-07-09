@@ -331,7 +331,7 @@ export class MailDetailComponent implements OnInit, OnDestroy {
               // Mark mail as read
               if (!this.mail.read && !this.markedAsRead) {
                 this.markedAsRead = true;
-                this.markAsRead(this.mail.id);
+                this.markAsRead(this.mail.id, true);
               }
             }
           }
@@ -783,8 +783,8 @@ export class MailDetailComponent implements OnInit, OnDestroy {
     this.store.dispatch(new StarMail({ ids: `${this.mail.id}`, starred, withChildren }));
   }
 
-  markAsRead(mailID: number, read = true) {
-    this.store.dispatch(new ReadMail({ ids: mailID.toString(), read }));
+  markAsRead(mailID: number, isLocalUpdate = false, read = true) {
+    this.store.dispatch(new ReadMail({ ids: mailID.toString(), read, isLocalUpdate }));
     if (!read) {
       this.goBack();
     }
