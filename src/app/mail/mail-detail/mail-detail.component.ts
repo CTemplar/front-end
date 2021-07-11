@@ -205,6 +205,8 @@ export class MailDetailComponent implements OnInit, OnDestroy {
 
   unsubscribeMailTo = '';
 
+  isElectron = false;
+
   constructor(
     private route: ActivatedRoute,
     private activatedRoute: ActivatedRoute,
@@ -223,6 +225,7 @@ export class MailDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     SafePipe.hasExternalImages = false;
+    this.isElectron = this.electronService.isElectron;
     /**
      * Check getting mail is succeeded
      */
@@ -596,7 +599,8 @@ export class MailDetailComponent implements OnInit, OnDestroy {
   }
 
   viewEmailInLightMode() {
-    const win = window.open(`${document.location.href}?lightMode=true`, '_blank');
+    const link = `${document.location.href}?lightMode=true`;
+    const win = window.open(link, '_blank');
     win.focus();
   }
 

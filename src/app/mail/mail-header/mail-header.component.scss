@@ -73,13 +73,13 @@
   .mailbox-navbar-col {
     @include media('<ipad', '>sm') {
       &:first-of-type {
-        flex: 0 0 calc(100% - 265px);
-        max-width: calc(100% - 265px);
+        flex: 0 0 calc(100% - 345px);
+        max-width: calc(100% - 345px);
       }
 
       &:last-of-type {
-        flex: 0 0 265px;
-        max-width: 265px;
+        flex: 0 0 345px;
+        max-width: 345px;
       }
     }
   }

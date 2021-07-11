@@ -70,6 +70,27 @@
             <i class="fas fa-shield-alt"></i>
           </a>
         </li>
+
+        <li class="" *ngIf="isDarkMode && isElectron">
+          <a
+            *ngIf="!isForceLightMode; else darkIcon"
+            placement="bottom"
+            (click)="onLightDarkMode()"
+            [ngbTooltip]="'mail_header.view_email_light_mode' | translate"
+          >
+            <i class="fas fa-sun"></i>
+          </a>
+          <ng-template #darkIcon>
+            <a
+              placement="bottom"
+              (click)="onLightDarkMode()"
+              [ngbTooltip]="'mail_header.view_email_dark_mode' | translate"
+            >
+              <i class="fas fa-moon"></i>
+            </a>
+          </ng-template>
+        </li>
+
         <!--Help dropdown -->
         <li class="btn-dropdown help-icon">
           <div ngbDropdown>

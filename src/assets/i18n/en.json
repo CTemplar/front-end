@@ -596,7 +596,9 @@
     "undo": "Undo",
     "permanently_delete": "Permanently deleting data",
     "permanently_delete_all": "Permanently deleting all usage data  from your visit",
-    "verified_user": "Verified Sender"
+    "verified_user": "Verified Sender",
+    "view_email_light_mode": "View email in light mode if you are having issues to view email in dark mode",
+    "view_email_dark_mode": "View email in Dark mode if you are having issues to view email in light mode"
   },
   "mail_list": {
     "select_messages": "Select messages",

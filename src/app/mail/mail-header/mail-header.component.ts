@@ -1,4 +1,4 @@
-import { Component, Inject, ChangeDetectionStrategy, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy, OnInit, ViewChild } from '@angular/core';
 import { NgbDropdownConfig, NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
@@ -12,7 +12,8 @@ import { ComposeMailService } from '../../store/services/compose-mail.service';
 import { Language, LANGUAGES, PRIMARY_WEBSITE } from '../../shared/config';
 import { ExpireSession, Logout, SaveDraftOnLogout } from '../../store';
 import { AppState, UserState } from '../../store/datatypes';
-import { LOADING_IMAGE, HttpCancelService } from '../../store/services';
+import { LOADING_IMAGE, HttpCancelService, ElectronService } from '../../store/services';
+import { ThemeToggleService } from '../../shared/services/theme-toggle-service';
 
 @UntilDestroy()
 @Component({
@@ -51,6 +52,12 @@ export class MailHeaderComponent implements OnInit {
 
   primaryWebsite = PRIMARY_WEBSITE;
 
+  isDarkMode: boolean;
+
+  isForceLightMode: boolean;
+
+  isElectron = false;
+
   constructor(
     private store: Store<AppState>,
     config: NgbDropdownConfig,
@@ -60,6 +67,8 @@ export class MailHeaderComponent implements OnInit {
     @Inject(DOCUMENT) private document: Document,
     private composeMailService: ComposeMailService,
     private httpCancelService: HttpCancelService,
+    private themeToggleService: ThemeToggleService,
+    private electronService: ElectronService,
   ) {
     config.autoClose = true;
   }
@@ -72,6 +81,7 @@ export class MailHeaderComponent implements OnInit {
       .select(state => state.user)
       .pipe(untilDestroyed(this))
       .subscribe((user: UserState) => {
+        this.isDarkMode = user.settings.is_night_mode;
         if (user.settings.language) {
           const language = this.languages.find(item => item.name === user.settings.language);
           if (this.selectedLanguage.name !== language.name || !this.isSetLanguage) {
@@ -101,6 +111,9 @@ export class MailHeaderComponent implements OnInit {
       .subscribe(() => {
         this.searchInput.setValue('', { emitEvent: false, emitModelToViewChange: true, emitViewToModelChange: false });
       });
+
+    this.isForceLightMode = this.themeToggleService.getIsForceLightMode();
+    this.isElectron = this.electronService.isElectron;
   }
 
   setSearchPlaceholder(url: string) {
@@ -159,5 +172,14 @@ export class MailHeaderComponent implements OnInit {
       this.searchInput.setValue(query);
     }
     this.advancedSearchElement?.close();
+  }
+
+  onLightDarkMode() {
+    this.isForceLightMode = !this.isForceLightMode;
+    if (this.isForceLightMode) {
+      this.themeToggleService.forceLightModeTheme();
+    } else {
+      this.themeToggleService.forceDarkModeTheme();
+    }
   }
 }
